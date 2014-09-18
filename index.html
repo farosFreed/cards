@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>cards</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="js/script.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div class="board">
+    	content
+    </div>
+
+    <script type="text/javascript">
+
+$(document).ready(function(){
+
+//create card library deck
+var cardLibraryDeck = new Stack();
+cardLibraryDeck.createStack(cardLibrary);
+
+//works
+//alert(cardLibraryDeck.cards[3].cardTitle);
+
+//create card banks
+
+//16 mutation cards
+var mutationDeck = new Stack();
+mutationDeck.createStack(mutations);
+cardMultiplier(mutationDeck, mutationDeck[0], 15);
+
+//16 small victory cards
+var smallVictoryDeck = new Stack();
+smallVictoryDeck.createStack(smallVictory);
+cardMultiplier(smallVictoryDeck, smallVictoryDeck[0], 15);
+
+//8 big victory cards
+var bigVictoryDeck = new Stack();
+bigVictoryDeck.createStack(bigVictory);
+cardMultiplier(bigVictoryDeck, bigVictoryDeck[0], 7);
+
+
+
+//create empty card bank - dont need this for now
+//var cardBank = new Stack();
+//cardBank.createStack();
+
+//create player starting hand
+var playerDeck = new Stack();
+playerDeck.createStack(starterDeck);
+
+//put 5 cards from library into hand (library hand is buyable)
+for (i=0; i < 5; i++){
+  cardLibraryDeck.drawCard(cardLibraryDeck.deal());
+}
+
+//works
+//alert(cardLibraryDeck.hand[2].cardTitle);
+
+//deal from card library and add to player discard
+//playerDeck.discard(cardLibraryDeck.deal());
+//works
+//alert(playerDeck.discardPile[0].cardTitle);
+
+//
+
+//shuffle discard in with deck
+//print player discard
+});
+    </script>
+  </body>
+</html>
