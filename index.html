@@ -23,7 +23,20 @@ cardLibraryDeck.createStack(cardLibrary);
 //works
 //alert(cardLibraryDeck.cards[3].cardTitle);
 
+//create players
+//TODO allow name input, allow multiple players
+var playerName = new Player('player name');
+
+//create player(s) starting hand(s) and shuffle
+playerName.deck.createStack(starterDeck);
+playerName.deck.shuffle();
+
+//create VARS
+var currentPlayer;
+window.noTail = '';
+
 //create card banks
+//TODO base this on number of players
 
 //16 mutation cards
 var mutationDeck = new Stack();
@@ -40,33 +53,38 @@ var bigVictoryDeck = new Stack();
 bigVictoryDeck.createStack(bigVictory);
 cardMultiplier(bigVictoryDeck, bigVictoryDeck[0], 7);
 
-
-
-//create empty card bank - dont need this for now
-//var cardBank = new Stack();
-//cardBank.createStack();
-
-//create player starting hand
-var playerDeck = new Stack();
-playerDeck.createStack(starterDeck);
+//set current player
+currentPlayer = playerName;
 
 //put 5 cards from library into hand (library hand is buyable)
 for (i=0; i < 5; i++){
   cardLibraryDeck.drawCard(cardLibraryDeck.deal());
 }
-
 //works
 //alert(cardLibraryDeck.hand[2].cardTitle);
+
+//START TURN LOOP
+//play cards while no tails
+do {
+  //deal from player cards(deck) to player's game board
+  playerName.deck.playCard(playerName.deck.deal(), currentPlayer);
+} while (window.noTail != 'tail');
+
+//player buys
+currentPlayer.scoreTurn();
+
+//player upgrades
+
+
+//END TURN LOOP
+
+
+
 
 //deal from card library and add to player discard
 //playerDeck.discard(cardLibraryDeck.deal());
 //works
 //alert(playerDeck.discardPile[0].cardTitle);
-
-//
-
-//shuffle discard in with deck
-//print player discard
 });
     </script>
   </body>

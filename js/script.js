@@ -36,6 +36,27 @@ var bigUpgrade = [
 
 //var emptyDeck = [] don't need this
 
+function Player(playerName) {
+  this.playerName = playerName;
+  this.totalScore = 0;
+  this.totalPower = 0;
+  this.beastSize = 0;
+  this.maxbeastSize = 8;
+  this.deck = new Stack();
+  this.scoreTurn = function(){
+  	//gain mutations if necessary
+  	if(this.beastSize > this.maxbeastSize ){
+
+  	}
+  	alert("You have " + this.totalPower + " and " + this.beastSize + " cards played");
+  }
+  //this.stack = new Stack();
+  //this.scoreTurn = function(){
+  	//todo
+  	//add to power score
+  //}
+}
+
 function Card(cardTitle, cost, points, power, cardType, cardText) {
 	this.cardTitle = cardTitle;
 	this.cost = cost;
@@ -44,20 +65,15 @@ function Card(cardTitle, cost, points, power, cardType, cardText) {
 	this.cardType = cardType;
 	this.cardText = cardText;
 	//this.toString = function(card){};
-
-}
-
-
-function Player(playerName, score, money) {
-  this.playerName = playerName;
-  this.score = score;
-  this.money = money;
 }
 
 function Stack(){
 	this.cards;
 	this.hand;
 	this.discardPile;
+	this.played;
+	this.other; //extra array for upgrade cards etc
+	this.head; //TODO implement head scoring
 	this.createStack = function(cardArray){
 		var cards = [];
 		for (var i=0; i < cardArray.length; i++){
@@ -67,6 +83,12 @@ function Stack(){
 	this.cards = cards;
 	this.hand = [];
 	this.discardPile = [];
+	this.played = [];
+	this.other = [];
+	}
+	//used for cardMultiplier function, not gameplay
+	this.addCard = function(card){
+		this.cards.push(card);
 	}
 	this.shuffle = function() {
 		var cards = this.cards;
@@ -81,18 +103,7 @@ function Stack(){
    		}
   	return cards;
 	}
-	this.drawCard = function(card){
-		this.hand.push(card);
-	}
-	this.addCard = function(card){
-		this.cards.push(card);
-	}
-	this.discard = function(card){
-		this.discardPile.push(card);
-	}
-	this.checkDiscardPile = function(){
-		//TODO seriously how are we displayin' this shiz
-	}
+	//takes cards from stack
 	this.deal = function(){
 		if (this.cards.length > 0){
 			return this.cards.shift();
@@ -100,6 +111,27 @@ function Stack(){
 			return null;
 			//shuffle deck and then draw?
 		}
+	}
+	//add cards to different stack arrays
+	this.drawCard = function(card){
+		this.hand.push(card);
+	}
+	this.discard = function(card){
+		this.discardPile.push(card);
+	}
+	this.playCard = function(card, player){
+		this.played.push(card);
+		player.totalPower += card.power;
+		player.beastSize ++;
+
+		//end turn if tail
+		if (card.cardType == 'tail'){
+			window.noTail = 'tail';
+		}
+	}
+	//get info 
+	this.checkDiscardPile = function(){
+		//TODO seriously how are we displayin' this shiz
 	}
 }
 
@@ -109,31 +141,10 @@ function cardMultiplier(stack, card, num){
 	}
 }
 
-//pasted
-//function shufflePack(pack) {  
-//  var i = pack.length, j, tempi, tempj;
-//  if (i === 0) return false;
-//  while (--i) {
-//     j = Math.floor(Math.random() * (i + 1));
-//     tempi = pack[i];
-//     tempj = pack[j];
-//     pack[i] = tempj;
-//     pack[j] = tempi;
-//   }
-//  return pack;
-//}
+function buyCards(){
+
+}
 
 
 
 
-
-//	this.deal = function(numCards){
-	//	for (var i=0; i < numCards; i++){
-	//		if (this.cards.length > 0){
-	//			return this.cards.shift();
-	//		} else {
-	//			return null;
-	//			//shuffle deck and then draw?
-	//		}
-		//	}
-//}
