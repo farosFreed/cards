@@ -21,6 +21,7 @@ $(document).ready(function(){
 //create card library deck
 var cardLibraryDeck = new Stack();
 cardLibraryDeck.createStack(cardLibrary);
+cardLibraryDeck.shuffle();
 
 //works
 //alert(cardLibraryDeck.cards[3].cardTitle);
@@ -35,7 +36,10 @@ playerName.deck.shuffle();
 
 //create VARS
 var currentPlayer;
+var currentColors;
 window.noTail = '';
+var topUpgrade;
+var topHead;
 
 //create card banks
 //TODO base this on number of players
@@ -65,10 +69,16 @@ headDeck.createStack(heads);
 headDeck.shuffle();
 //TODO end game if these stacks are empty
 
+//top card of each deck into hand (buyable)
+var upgradeCard = upgradeDeck.deal();
+$('#console').append('<p>upgrade card costs '+upgradeCard.cost.blue+' blue, '+upgradeCard.cost.red+' red, and '+upgradeCard.cost.green+' green.</p>');
+var headCard = headDeck.deal();
+$('#console').append('<p>head card costs '+headCard.cost.blue+' blue, '+headCard.cost.red+' red, and '+headCard.cost.green+' green.</p>');
+
 //set current player
 currentPlayer = playerName;
 
-//put 5 cards from library into hand (library hand is buyable)
+//put 5 cards from library into hand (buyable)
 for (i=0; i < 5; i++){
   var card = cardLibraryDeck.deal();
   $('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
@@ -117,15 +127,66 @@ while (currentPlayer.totalPower >= 2){
     $("#console").append("<p>You don't have enough power to do that.</p>");
   }
 }
-//TODO message to tell player buy round is over?
+//score turn, end buy, tally colors into an object
+currentColors = currentPlayer.scoreTurn();
 
-//player upgrades
+
+//UPGRADE / evolve
+//check if upgrade and head cards can be bought, start false
+var headBuyable = false;
+var upgradeBuyable = false;
+//check head
+if(currentColors.blue >= headCard.cost.blue){
+  if(currentColors.red >= headCard.cost.red){
+    if(currentColors.green >= headCard.cost.green){
+        headBuyable = true;
+    }
+  }
+} 
+//check upgrade
+if(currentColors.blue >= upgradeCard.cost.blue){
+  if(currentColors.red >= upgradeCard.cost.red){
+    if(currentColors.green >= upgradeCard.cost.green){
+        upgradeBuyable = true;
+    }
+  }
+} 
+//if you can afford it, buy a card
+if(upgradeBuyable == true && headBuyable == true){
+  var choice = prompt('You can evolve! Type "1" to get the upgrade card '+upgradeCard.cardTitle+' or "2" to get the head card '+headCard.cardTitle);
+  if(choice == 1){
+    $('#console').append('<p>You bought '+upgradeCard.cardTitle+'</p>');
+    currentPlayer.deck.addCard(upgradeCard, 'upgrades');
+    return;
+  } else if(choice == 2){
+    $('#console').append('<p>You bought '+headCard.cardTitle+'</p>')
+    currentPlayer.deck.addCard(headCard, 'heads');
+    return;
+  }else{
+    $('#console').append('<p>What are you ... I dont even ...</p>')
+  }
+} else {
+  if(headBuyable == true){
+    $('#console').append('<p>You bought '+headCard.cardTitle+'</p>');
+    //send card to stack.head
+    currentPlayer.deck.addCard(headCard, 'heads');
+    return;
+  }
+  if(upgradeBuyable == true){
+    $('#console').append('<p>You bought '+upgradeCard.cardTitle+'</p>');
+    //send card to stack.upgrades
+    currentPlayer.deck.addCard(upgradeCard, 'upgrades');
+    return;
+  }
+  $('#console').append('<p>nothing to evolve this round.</p>');
+}
+
 
 
 //END TURN LOOP
 
 
-
+//END GAME
 
 //deal from card library and add to player discard
 //playerDeck.discard(cardLibraryDeck.deal());

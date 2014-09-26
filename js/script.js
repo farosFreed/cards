@@ -2,9 +2,9 @@
 var cardLibrary = [
 	['firstCardTitle', 4, 2, 2, 'blue', 'body', 'functionName', '+2 power'],
 	['thick thighs', 2, 1, 2, 'green', 'body', 'functionName', '+2 power'], 
-	['card number 3', 5, 2, 4, 'green', 'tail', 'functionName', '+4 power'],
-	['sticky sav', 3, 1, 3, 'green', 'tail', 'functionName', '+3 power'],
-	['sticky sav2', 3, 1, 3, 'green', 'tail', 'functionName', '+3 power'],
+	['card number 3', 2, 2, 4, 'green', 'tail', 'functionName', '+4 power'],
+	['sticky sav', 2, 1, 3, 'green', 'tail', 'functionName', '+3 power'],
+	['sticky sav2', 2, 1, 3, 'green', 'tail', 'functionName', '+3 power'],
 	['sticky sav3', 3, 1, 3, 'green', 'tail', 'functionName', '+3 power']
 ]
 
@@ -29,22 +29,22 @@ var bigVictory = [
 ]
 
 var upgrades = [
-	['upgrade01',['red','green'],2,0, 'upgrade', 'functionName', '+2 points, whatever power functionName grants'],
-	['upgrade02',['red','blue'],2,0, 'upgrade', 'functionName', '+2 points, whatever power functionName grants'],
-	['upgrade03',['blue','green'],3,0, 'upgrade', 'functionName', '+3 points, whatever power functionName grants'],
-	['upgrade04',['red','red'],3,0, 'upgrade', 'functionName', '+3 points, whatever power functionName grants'],
-	['upgrade05',['blue','blue'],4,0, 'upgrade', 'functionName', '+4 points, whatever power functionName grants'],
-	['upgrade06',['green','green'],4,0, 'upgrade', 'functionName', '+4 points, whatever power functionName grants']
+	['upgrade01',{'red':1,'green':1,'blue':0},2,0, 'upgrade', 'functionName', '+2 points, whatever power functionName grants'],
+	['upgrade02',{'red':1,'green':0,'blue':1},2,0, 'upgrade', 'functionName', '+2 points, whatever power functionName grants'],
+	['upgrade03',{'red':0,'green':1,'blue':1},3,0, 'upgrade', 'functionName', '+3 points, whatever power functionName grants'],
+	['upgrade04',{'red':2,'green':0,'blue':0},3,0, 'upgrade', 'functionName', '+3 points, whatever power functionName grants'],
+	['upgrade05',{'red':0,'green':0,'blue':2},4,0, 'upgrade', 'functionName', '+4 points, whatever power functionName grants'],
+	['upgrade06',{'red':0,'green':2,'blue':0},4,0, 'upgrade', 'functionName', '+4 points, whatever power functionName grants']
 
 ]
 
 var heads = [
-	['head01',['red','red','green'],5,0, 'head', 'functionName', '+5 points, whatever power functionName grants'],
-	['head02',['blue','red','green'],5,0, 'head', 'functionName', '+5 points, whatever power functionName grants'],
-	['head03',['blue','blue','green'],5,0, 'head', 'functionName', '+5 points, whatever power functionName grants'],
-	['head04',['red','red','red'],5,0, 'head', 'functionName', '+5 points, whatever power functionName grants'],
-	['head05',['green','green','green'],5,0, 'head', 'functionName', '+5 points, whatever power functionName grants'],
-	['head06',['blue','blue','blue'],5,0, 'head', 'functionName', '+5 points, whatever power functionName grants']
+	['head01',{'red':2,'green':1,'blue':0},5,0, 'head', 'functionName', '+5 points, whatever power functionName grants'],
+	['head02',{'red':1,'green':1,'blue':1},5,0, 'head', 'functionName', '+5 points, whatever power functionName grants'],
+	['head03',{'red':0,'green':1,'blue':2},5,0, 'head', 'functionName', '+5 points, whatever power functionName grants'],
+	['head04',{'red':3,'green':0,'blue':0},5,0, 'head', 'functionName', '+5 points, whatever power functionName grants'],
+	['head05',{'red':0,'green':3,'blue':0},5,0, 'head', 'functionName', '+5 points, whatever power functionName grants'],
+	['head06',{'red':0,'green':0,'blue':3},5,0, 'head', 'functionName', '+5 points, whatever power functionName grants']
 ]
 
 function Player(playerName) {
@@ -61,12 +61,33 @@ function Player(playerName) {
   	if(this.beastSize > this.maxbeastSize ){
   		this.deck.discard(mutations.deal());
   	}
-  	alert("You have " + this.totalPower + " and " + this.beastSize + " cards played");
+  	//process color array
+  	var colors = this.totalColor;
+	var result = { };
+	for(i = 0; i < colors.length; ++i) {
+    	if(!result[colors[i]]){
+        	result[colors[i]] = 0;
+    	}
+    	++result[colors[i]];
+    }
+    if(typeof result.blue === 'undefined'){
+    	result.blue = 0;
+    }
+    if(typeof result.green === 'undefined'){
+    	result.green = 0;
+    }
+    if(typeof result.red === 'undefined'){
+    	result.red = 0;
+    }
+
+
+    //log
+    $('#console').append('<p>You have '+this.totalPower+' power left over with '+this.beastSize+" cards played this turn.</p>");
+    $('#console').append('<p>You have '+result.blue+' blue, '+result.red+' red, and '+result.green+' green.</p>');
+
+    //return
+    return result;
   }
-  //this.scoreTurn = function(){
-  	//todo
-  	//add to power score
-  //}
 }
 
 function Card(cardTitle, cost, points, power, color, cardType, cardFunction, cardText) {
@@ -83,11 +104,11 @@ function Card(cardTitle, cost, points, power, color, cardType, cardFunction, car
 
 function Stack(){
 	this.cards;
-	this.hand;
-	this.discardPile;
-	this.played;
-	this.upgrades;
-	this.heads; 
+	this.hand = [];
+	this.discardPile = [];
+	this.played = [];
+	this.upgrades = [];
+	this.heads = [];
 	this.createStack = function(cardArray){
 		var cards = [];
 		for (var i=0; i < cardArray.length; i++){
@@ -95,16 +116,11 @@ function Stack(){
 			cards.push(card);
 		}
 	this.cards = cards;
-	this.hand = [];
-	this.discardPile = [];
-	this.played = [];
-	this.upgrades = [];
-	this.heads = [];
 	}
 	//used for cardMultiplier function, not gameplay
-	this.addCard = function(card){
-		this.cards.push(card);
-	}
+	//this.addCard = function(card){
+	//	this.cards.push(card);
+	//}
 	this.shuffle = function() {
 		var cards = this.cards;
 		var i = cards.length, j, tempi, tempj;
@@ -117,6 +133,31 @@ function Stack(){
      	cards[j] = tempi;
    		}
   	return cards;
+	}
+	//new deal with deck argument
+	this.addCard = function(card, deckName){
+		switch(deckName) {
+    		case 'cards':
+        		this.cards.push(card);
+        		break;
+    		case 'discardPile':
+        		this.discardPile.push(card);		
+        		break;
+        	case 'hand':
+        		this.hand.push(card);
+        		break;
+        	case 'played':
+        		this.played.push(card);
+        		break;
+        	case 'heads':
+        		this.heads.push(card);
+        		break;
+        	case 'upgrades':
+        		this.upgrades.push(card);
+        		break;
+    		default:
+        		this.cards.push(card);
+			} 
 	}
 	//takes cards from stack
 	this.deal = function(){
