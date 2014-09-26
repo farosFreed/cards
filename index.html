@@ -9,7 +9,9 @@
   </head>
   <body>
     <div class="board">
-    	content
+      <div id="console">
+        Welcome to Build-a-Beast<br />
+      </div>
     </div>
 
     <script type="text/javascript">
@@ -53,25 +55,69 @@ var bigVictoryDeck = new Stack();
 bigVictoryDeck.createStack(bigVictory);
 cardMultiplier(bigVictoryDeck, bigVictoryDeck[0], 7);
 
+//upgrade & head cards
+var upgradeDeck = new Stack();
+upgradeDeck.createStack(upgrades);
+upgradeDeck.shuffle();
+
+var headDeck = new Stack();
+headDeck.createStack(heads);
+headDeck.shuffle();
+//TODO end game if these stacks are empty
+
 //set current player
 currentPlayer = playerName;
 
 //put 5 cards from library into hand (library hand is buyable)
 for (i=0; i < 5; i++){
-  cardLibraryDeck.drawCard(cardLibraryDeck.deal());
+  var card = cardLibraryDeck.deal();
+  $('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
+  cardLibraryDeck.drawCard(card);
 }
 //works
 //alert(cardLibraryDeck.hand[2].cardTitle);
 
-//START TURN LOOP
+//START TURN 
+
+//PLAY
 //play cards while no tails
 do {
-  //deal from player cards(deck) to player's game board
-  playerName.deck.playCard(playerName.deck.deal(), currentPlayer);
+  if (currentPlayer.deck.cards.length > 0){
+    //deal from player cards(deck) to player's game board
+    currentPlayer.deck.playCard(currentPlayer.deck.deal(), currentPlayer);
+  } else {
+    //put discard into cards and then shuffle
+    currentPlayer.deck.cards = currentPlayer.deck.discardPile.splice(0,currentPlayer.deck.discardPile.length);
+    currentPlayer.deck.shuffle();
+    $('#console').append('<p>Shuffling...</p>');
+    //and then deal
+    currentPlayer.deck.playCard(currentPlayer.deck.deal(), currentPlayer);
+  }
 } while (window.noTail != 'tail');
 
+//BUY
+//tell player totalPower from play round
+$('#console').append('<p>You have '+currentPlayer.totalPower+' power to spend.</p>');
 //player buys
-currentPlayer.scoreTurn();
+while (currentPlayer.totalPower >= 2){
+  //todo let user select card
+  var cardNum = prompt('select a card (#0-4)');
+  var card = cardLibraryDeck.hand[cardNum];
+
+  if (card.cost <= currentPlayer.totalPower){
+  	//put card in player discard pile
+    currentPlayer.deck.discard(cardLibraryDeck.hand.splice(cardNum));
+    //- cost of card from player's totalPower bank
+    currentPlayer.totalPower -= card.cost;
+    //print card title and cost to console
+    $("#console").append(
+    	"<p>"+card.cardTitle+" bought for "+card.power+". You have "+currentPlayer.totalPower+" left.</p>"
+    	);
+  } else {
+    $("#console").append("<p>You don't have enough power to do that.</p>");
+  }
+}
+//TODO message to tell player buy round is over?
 
 //player upgrades
 
