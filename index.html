@@ -49,6 +49,10 @@ var mutationDeck = new Stack();
 mutationDeck.createStack(mutations);
 cardMultiplier(mutationDeck, mutationDeck[0], 15);
 
+
+//TODO missing body cards
+
+
 //16 small victory cards
 var smallVictoryDeck = new Stack();
 smallVictoryDeck.createStack(smallVictory);
@@ -68,8 +72,7 @@ var headDeck = new Stack();
 headDeck.createStack(heads);
 headDeck.shuffle();
 //TODO end game if these stacks are empty
-
-//top card of each deck into hand (buyable)
+//top card of each deck into buyable variable
 var upgradeCard = upgradeDeck.deal();
 $('#console').append('<p>upgrade card costs '+upgradeCard.cost.blue+' blue, '+upgradeCard.cost.red+' red, and '+upgradeCard.cost.green+' green.</p>');
 var headCard = headDeck.deal();
@@ -82,13 +85,13 @@ currentPlayer = playerName;
 for (i=0; i < 5; i++){
   var card = cardLibraryDeck.deal();
   $('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
-  cardLibraryDeck.drawCard(card);
+  cardLibraryDeck.addCard(card, 'hand');
 }
 //works
 //alert(cardLibraryDeck.hand[2].cardTitle);
 
-//START TURN 
-
+//****START TURN******
+//
 //PLAY
 //play cards while no tails
 do {
@@ -116,12 +119,16 @@ while (currentPlayer.totalPower >= 2){
 
   if (card.cost <= currentPlayer.totalPower){
   	//put card in player discard pile
-    currentPlayer.deck.discard(cardLibraryDeck.hand.splice(cardNum));
+    currentPlayer.deck.addCard(card, 'discardPile');
+
+    //remove card from library
+    cardLibraryDeck.hand.splice(cardNum, 1);
+    
     //- cost of card from player's totalPower bank
     currentPlayer.totalPower -= card.cost;
     //print card title and cost to console
     $("#console").append(
-    	"<p>"+card.cardTitle+" bought for "+card.power+". You have "+currentPlayer.totalPower+" left.</p>"
+    	"<p>"+card.cardTitle+" bought for "+card.cost+". You have "+currentPlayer.totalPower+" left.</p>"
     	);
   } else {
     $("#console").append("<p>You don't have enough power to do that.</p>");
@@ -181,17 +188,60 @@ if(upgradeBuyable == true && headBuyable == true){
   $('#console').append('<p>nothing to evolve this round.</p>');
 }
 
+//RESET FOR NEXT ROUND
+//all cards in currentPlayer.played go to discards
+for(i = currentPlayer.deck.played.length; i > 0; i--){
+	currentPlayer.deck.addCard(currentPlayer.deck.deal('played'), 'discardPile');
+}
+$('#console').append('<p>Discard pile now contains '+currentPlayer.deck.discardPile.length+' cards</p>');
+
+//check for game end
+var gameDecks = [cardLibraryDeck, mutationDeck, smallVictoryDeck, bigVictoryDeck, headDeck, upgradeDeck]
+//loop through decks array and check if any of empty
+for(i = 0; i < gameDecks.length; i++){
+	if (gameDecks[i].cards.length <= 0){
+		//if array is empty, go to game end function (scoring)
+		scoreGame();
+	}
+}
+
+//todo: change player to allow array, switch to next player in array dat end of turn reset
+//Clear player stats & reset tail variable
+window.noTail = '';
+currentPlayer.beastSize = 0;
+currentPlayer.totalColor = [];
+currentPlayer.totalPower = 0;
+
+//replenish library
+//if cardlibrary isn't full, add cards until it is
+if(cardLibraryDeck.hand.length < 5){
+	for(i = cardLibraryDeck.hand.length; i < 5; i++){
+		var card = cardLibraryDeck.deal();
+  		$('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
+  		cardLibraryDeck.drawCard(card);
+	}
+}
+
+//
+//*****END TURN****** 
 
 
-//END TURN LOOP
+//END GAME function (can be moved)
+function gameEnd(){
+	//TODO 
+	//easier to loop through all decks and add together
+	scoreDecks = [cards, hand, discardPile, heads, upgrades]
+  //loop through array above
+  for (i = 0; i < scoreDecks.length; i++){
+    //take cards out of array until empty
+    for (j = 0; j < playerName.deck.scoreDecks[i].length; playerName.deck.scoreDecks[i].splice(0,1)){
+      //score each card
+      playerName.deck.scoreDecks[i].scoreCard(playerName.deck.scoreDecks[i][j], playerName);
+    }
+  }
+  alert('total score is '+playerName.totalScore);
+}
 
-
-//END GAME
-
-//deal from card library and add to player discard
-//playerDeck.discard(cardLibraryDeck.deal());
-//works
-//alert(playerDeck.discardPile[0].cardTitle);
 });
     </script>
   </body>

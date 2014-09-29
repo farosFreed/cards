@@ -134,7 +134,7 @@ function Stack(){
    		}
   	return cards;
 	}
-	//new deal with deck argument
+	//new addCard with deck argument
 	this.addCard = function(card, deckName){
 		switch(deckName) {
     		case 'cards':
@@ -159,21 +159,68 @@ function Stack(){
         		this.cards.push(card);
 			} 
 	}
-	//takes cards from stack
-	this.deal = function(){
-		if (this.cards.length > 0){
-			return this.cards.shift();
-		} else {
-			return null;
-		}
+	//takes cards from different stack arrays
+	this.deal = function(deckName){
+		switch(deckName){
+			case 'cards':
+				if (this.cards.length > 0){
+					return this.cards.shift();
+				} else {
+					return null;
+					alert('no card dealt'); //testing, remove later
+				}
+				break;
+    		case 'discardPile':
+				if (this.discardPile.length > 0){
+					return this.discardPile.shift();
+				} else {
+					return null;
+					alert('no card dealt'); //testing, remove later
+				}
+				break;
+        	case 'hand':
+        		if (this.hand.length > 0){
+					return this.hand.shift();
+				} else {
+					return null;
+					alert('no card dealt'); //testing, remove later
+				}
+				break;
+        	case 'played':
+        		if (this.played.length > 0){
+					return this.played.shift();
+				} else {
+					return null;
+					alert('no card dealt'); //testing, remove later
+				}
+        		break;
+        	case 'heads':
+        		if (this.heads.length > 0){
+					return this.heads.shift();
+				} else {
+					return null;
+					alert('no card dealt'); //testing, remove later
+				}
+        		break;
+        	case 'upgrades':
+        		if (this.upgrades.length > 0){
+					return this.upgrades.shift();
+				} else {
+					return null;
+					alert('no card dealt'); //testing, remove later
+				}
+        		break;
+    		default:
+        		if (this.cards.length > 0){
+					return this.cards.shift();
+				} else {
+					return null;
+					alert('no card dealt'); //testing, remove later
+				}
+        		break;
+			}
 	}
-	//add cards to different stack arrays
-	this.drawCard = function(card){
-		this.hand.push(card);
-	}
-	this.discard = function(card){
-		this.discardPile.push(card);
-	}
+	//adds card to player's played array and tallies beastSize
 	this.playCard = function(card, player){
 		//play card
 		this.played.push(card);
@@ -197,9 +244,10 @@ function Stack(){
 		//log
 		$('#console').append('<p>Played '+card.cardTitle+" with power: "+card.power+"and color: "+card.cardColor+".</p>");
 	}
-	//get info 
-	this.checkDiscardPile = function(){
-		//TODO seriously how are we displayin' this shiz
+	//score cards
+	this.scoreCard = function(card, player){
+		player.totalScore += card.points;
+		alert('added '+card.points+' to total, new score '+player.totalScore);
 	}
 }
 
