@@ -1,23 +1,27 @@
 //Library of Cards goes here
 var cardLibrary = [
-	['firstCardTitle', 4, 2, 2, 'blue', 'body', 'functionName', '+2 power'],
-	['thick thighs', 2, 1, 2, 'green', 'body', 'functionName', '+2 power'], 
-	['card number 3', 2, 2, 4, 'green', 'tail', 'functionName', '+4 power'],
-	['sticky sav', 2, 1, 3, 'green', 'tail', 'functionName', '+3 power'],
-	['sticky sav2', 2, 1, 3, 'green', 'tail', 'functionName', '+3 power'],
-	['sticky sav3', 3, 1, 3, 'green', 'tail', 'functionName', '+3 power']
+	['firstCardTitle',4,2,2, 'blue', 'body', 'functionName', '+2 power'],
+	['thick thighs',2,1,2, 'green', 'body', 'functionName', '+2 power'], 
+	['card number 3',2,2,4, 'green', 'tail', 'functionName', '+4 power'],
+	['sticky sav',2,1,3, 'green', 'tail', 'functionName', '+3 power'],
+	['sticky sav2',2,1,3, 'green', 'tail', 'functionName', '+3 power'],
+	['sticky sav3',3,1,3, 'green', 'tail', 'functionName', '+3 power']
 ]
 
 var starterDeck = [
-	['starterBody',0,0,1, null, 'body', null, '+1 power'],
-	['starterBody',0,0,1, null, 'body', null,'+1 power'],
-	['starterBody',0,0,1, null, 'body', null,'+1 power'],
-	['starterTail',0,0,2, null, 'tail', null,'+2 power'],
-	['starterTail',0,0,2, null, 'tail', null,'+2 power']
+	['starterBody',0,4,1, null, 'body', null, '+1 power'],
+	['starterBody',0,4,1, null, 'body', null,'+1 power'],
+	['starterBody',0,4,1, null, 'body', null,'+1 power'],
+	['starterTail',0,2,2, null, 'tail', null,'+2 power'],
+	['starterTail',0,2,2, null, 'tail', null,'+2 power']
 ]
 
 var mutations = [
 	['mutation',0,-2,0, null, 'tail', null, '-2 points']
+]
+
+var basicBodies = [
+	['basic body',3,0,1,null, 'body', null, '+1']
 ]
 
 var smallVictory = [
@@ -220,6 +224,18 @@ function Stack(){
         		break;
 			}
 	}
+	//removes specific card from hand
+	this.buyCard = function(cardIndex){
+		var card = this.hand[cardIndex];
+
+		//remove card
+		this.hand.splice(cardIndex, 1);
+
+		//log card title and cost to console
+    	$("#console").append("<p>"+card.cardTitle+" bought for "+card.cost+".</p>");
+
+		return card;
+	}
 	//adds card to player's played array and tallies beastSize
 	this.playCard = function(card, player){
 		//play card
@@ -256,6 +272,61 @@ function cardMultiplier(stack, card, num){
 		stack.addCard(card);
 	}
 }
+
+
+//****START TURN******
+function playerTurn(playerName){
+//set current player (todo, make this random?)
+var currentPlayer = playerName;
+
+//PLAY
+//play cards while no tails
+do {
+  if (currentPlayer.deck.cards.length > 0){
+    //deal from player cards(deck) to player's game board
+    currentPlayer.deck.playCard(currentPlayer.deck.deal(), currentPlayer);
+  } else {
+    //put discard into cards and then shuffle
+    currentPlayer.deck.cards = currentPlayer.deck.discardPile.splice(0,currentPlayer.deck.discardPile.length);
+    currentPlayer.deck.shuffle();
+    $('#console').append('<p>Shuffling...</p>');
+    //and then deal
+    currentPlayer.deck.playCard(currentPlayer.deck.deal(), currentPlayer);
+  }
+} while (window.noTail != 'tail');
+
+//BUY
+//tell player totalPower from play round
+$('#console').append('<p>You have '+currentPlayer.totalPower+' power to spend.</p>');
+//player buys
+while (currentPlayer.totalPower >= 2){
+  //user selects cards
+  var cardNum = prompt('select a card (#0-4)');
+  var card = cardLibraryDeck.hand[cardNum];
+
+  if (card.cost <= currentPlayer.totalPower){
+  	//- cost of card from player's totalPower bank
+    currentPlayer.totalPower -= card.cost;
+
+  	//buy card from library and place in player discard
+  	//BUGS
+    currentPlayer.deck.addCard(cardLibraryDeck.buyCard(cardNum), 'discardPile');
+
+
+    //tell player remaining power
+    $('#console').append("<p>You have "+currentPlayer.totalPower+" left.</p>");
+
+    //remove card from library - should be done as part of buy
+    //cardLibraryDeck.hand.splice(cardNum, 1);
+  } else {
+    $("#console").append("<p>You don't have enough power to do that.</p>");
+  }
+}
+
+}
+
+
+
 
 //Card functions
 //example

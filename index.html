@@ -17,14 +17,19 @@
     <script type="text/javascript">
 
 $(document).ready(function(){
+  
+var playerName;
+var currentPlayer;
+var currentColors;
+window.noTail = '';
+var topUpgrade;
+var topHead;
 
+//GAME SETUP START
 //create card library deck
-var cardLibraryDeck = new Stack();
+cardLibraryDeck = new Stack();
 cardLibraryDeck.createStack(cardLibrary);
 cardLibraryDeck.shuffle();
-
-//works
-//alert(cardLibraryDeck.cards[3].cardTitle);
 
 //create players
 //TODO allow name input, allow multiple players
@@ -33,13 +38,6 @@ var playerName = new Player('player name');
 //create player(s) starting hand(s) and shuffle
 playerName.deck.createStack(starterDeck);
 playerName.deck.shuffle();
-
-//create VARS
-var currentPlayer;
-var currentColors;
-window.noTail = '';
-var topUpgrade;
-var topHead;
 
 //create card banks
 //TODO base this on number of players
@@ -50,7 +48,10 @@ mutationDeck.createStack(mutations);
 cardMultiplier(mutationDeck, mutationDeck[0], 15);
 
 
-//TODO missing body cards
+//16 body cards
+var basicDeck = new Stack();
+basicDeck.createStack(basicBodies);
+cardMultiplier(basicDeck, basicDeck[0], 15);
 
 
 //16 small victory cards
@@ -72,14 +73,12 @@ var headDeck = new Stack();
 headDeck.createStack(heads);
 headDeck.shuffle();
 //TODO end game if these stacks are empty
+
 //top card of each deck into buyable variable
 var upgradeCard = upgradeDeck.deal();
 $('#console').append('<p>upgrade card costs '+upgradeCard.cost.blue+' blue, '+upgradeCard.cost.red+' red, and '+upgradeCard.cost.green+' green.</p>');
 var headCard = headDeck.deal();
 $('#console').append('<p>head card costs '+headCard.cost.blue+' blue, '+headCard.cost.red+' red, and '+headCard.cost.green+' green.</p>');
-
-//set current player
-currentPlayer = playerName;
 
 //put 5 cards from library into hand (buyable)
 for (i=0; i < 5; i++){
@@ -87,54 +86,17 @@ for (i=0; i < 5; i++){
   $('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
   cardLibraryDeck.addCard(card, 'hand');
 }
-//works
-//alert(cardLibraryDeck.hand[2].cardTitle);
 
-//****START TURN******
-//
-//PLAY
-//play cards while no tails
-do {
-  if (currentPlayer.deck.cards.length > 0){
-    //deal from player cards(deck) to player's game board
-    currentPlayer.deck.playCard(currentPlayer.deck.deal(), currentPlayer);
-  } else {
-    //put discard into cards and then shuffle
-    currentPlayer.deck.cards = currentPlayer.deck.discardPile.splice(0,currentPlayer.deck.discardPile.length);
-    currentPlayer.deck.shuffle();
-    $('#console').append('<p>Shuffling...</p>');
-    //and then deal
-    currentPlayer.deck.playCard(currentPlayer.deck.deal(), currentPlayer);
-  }
-} while (window.noTail != 'tail');
 
-//BUY
-//tell player totalPower from play round
-$('#console').append('<p>You have '+currentPlayer.totalPower+' power to spend.</p>');
-//player buys
-while (currentPlayer.totalPower >= 2){
-  //todo let user select card
-  var cardNum = prompt('select a card (#0-4)');
-  var card = cardLibraryDeck.hand[cardNum];
 
-  if (card.cost <= currentPlayer.totalPower){
-  	//put card in player discard pile
-    currentPlayer.deck.addCard(card, 'discardPile');
+//Player plays card and buys
+playerTurn(playerName);
 
-    //remove card from library
-    cardLibraryDeck.hand.splice(cardNum, 1);
-    
-    //- cost of card from player's totalPower bank
-    currentPlayer.totalPower -= card.cost;
-    //print card title and cost to console
-    $("#console").append(
-    	"<p>"+card.cardTitle+" bought for "+card.cost+". You have "+currentPlayer.totalPower+" left.</p>"
-    	);
-  } else {
-    $("#console").append("<p>You don't have enough power to do that.</p>");
-  }
-}
+//TODO - put below into upgrade function
+//set current player to PlayerName
 //score turn, end buy, tally colors into an object
+currentPlayer = playerName;
+
 currentColors = currentPlayer.scoreTurn();
 
 
@@ -191,7 +153,7 @@ if(upgradeBuyable == true && headBuyable == true){
 //RESET FOR NEXT ROUND
 //all cards in currentPlayer.played go to discards
 for(i = currentPlayer.deck.played.length; i > 0; i--){
-	currentPlayer.deck.addCard(currentPlayer.deck.deal('played'), 'discardPile');
+  currentPlayer.deck.addCard(currentPlayer.deck.deal('played'), 'discardPile');
 }
 $('#console').append('<p>Discard pile now contains '+currentPlayer.deck.discardPile.length+' cards</p>');
 
@@ -199,10 +161,11 @@ $('#console').append('<p>Discard pile now contains '+currentPlayer.deck.discardP
 var gameDecks = [cardLibraryDeck, mutationDeck, smallVictoryDeck, bigVictoryDeck, headDeck, upgradeDeck]
 //loop through decks array and check if any of empty
 for(i = 0; i < gameDecks.length; i++){
-	if (gameDecks[i].cards.length <= 0){
-		//if array is empty, go to game end function (scoring)
-		scoreGame();
-	}
+  if (gameDecks[i].cards.length <= 0){
+    //if array is empty, go to game end function (scoring)
+    scoreGame();
+    return;
+  }
 }
 
 //todo: change player to allow array, switch to next player in array dat end of turn reset
@@ -215,32 +178,38 @@ currentPlayer.totalPower = 0;
 //replenish library
 //if cardlibrary isn't full, add cards until it is
 if(cardLibraryDeck.hand.length < 5){
-	for(i = cardLibraryDeck.hand.length; i < 5; i++){
-		var card = cardLibraryDeck.deal();
-  		$('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
-  		cardLibraryDeck.drawCard(card);
-	}
+  for(i = cardLibraryDeck.hand.length; i < 5; i++){
+    var card = cardLibraryDeck.deal();
+      $('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
+      cardLibraryDeck.addCard(card, 'hand');
+  }
 }
-
-//
-//*****END TURN****** 
 
 
 //END GAME function (can be moved)
 function gameEnd(){
 	//TODO 
 	//easier to loop through all decks and add together
-	scoreDecks = [cards, hand, discardPile, heads, upgrades]
+	//scoreDecks = ['cards', 'hand', 'discardPile', 'heads', 'upgrades']
   //loop through array above
-  for (i = 0; i < scoreDecks.length; i++){
-    //take cards out of array until empty
-    for (j = 0; j < playerName.deck.scoreDecks[i].length; playerName.deck.scoreDecks[i].splice(0,1)){
+
+  //score 'cards' deck
+  for (i = 0; i < playerName.deck.cards.length; playerName.deck.cards.splice(0,1)){
       //score each card
-      playerName.deck.scoreDecks[i].scoreCard(playerName.deck.scoreDecks[i][j], playerName);
-    }
+      playerName.deck.scoreCard(playerName.deck.cards[i], playerName);
   }
+
+  //score 'discardPile'
+  for (j = 0; j < playerName.deck.discardPile.length; playerName.deck.discardPile.splice(0,1)){
+      //score each card
+      playerName.deck.scoreCard(playerName.deck.discardPile[j], playerName);
+  }
+
   alert('total score is '+playerName.totalScore);
 }
+
+//testing
+gameEnd();
 
 });
     </script>
