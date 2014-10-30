@@ -45,12 +45,7 @@ border-spacing: 0;
 /*css reset end*/
 
 
-
-
 /*alright for real now ... */
-
-
-
 html {
 	height:100%;
 	width:100%;
@@ -59,10 +54,101 @@ html {
 body {
 	height:100%;
 	width:100%;
+	font-family:"Arial",sans-serif;
 }
 
+/*UI*/
+.wrapper {
+	text-align:center;
+}
+
+.button {
+	display:inline-block;
+	min-width:75px;
+	padding:3px;
+}
+
+.buttonPrimary {
+	background:red;
+}
+
+/*CARD PLAY AREAS*/
+
 .board {
-	height:100%;
+	background:#eeeeee;
+	height:95%;
+	width:95%;
+	/*max-width:1024px;*/
+	/*max-height:768px;*/
+	margin: 0 auto;
+	padding:10px;
+}
+
+#console {
+	padding:10px;
+	position:absolute;
+	bottom:0px;
+	left:0px;
+	opacity: .3;
+	background:#fff;
+}
+
+#library {
+	background:#ffffff;
+	width:90%;
+	margin: 0 auto;
+	display:inline-block;
+}
+#library .card {
+	margin: 0 1.75% 10px 0;
+}
+#library .card.last {
+	margin-right: 0px;
+}
+
+#playerArea {
+	width:90%;
+	margin: 0 auto;
+	background:#fff;
+}
+
+#playerPlayed {
+	display:inline-block;
+	width:65%;
+}
+
+#playerDraw {
+	position:absolute;
 	width:100%;
-	padding:5px;
+	height:100px;
+	bottom:0px;
+}
+
+#playerStats {
+	font-size:2em;
+	text-align:center;
+	margin-bottom:20px;
+}
+
+/*OBJECTS*/
+.card {
+	position:relative;
+	/* playing cards are 2.5in x 3.5in */
+	height:170px; /*todo let content determine this*/
+	width:13.5%;
+	background:#333333;
+	display:inline-block;
+}
+.stackCount {
+	position:absolute;
+	bottom:-15px;
+	width:100%;
+}
+
+.upgrade {
+	background:red;
+}
+
+.head {
+	background:blue;
 }

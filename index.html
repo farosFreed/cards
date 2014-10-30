@@ -9,209 +9,70 @@
   </head>
   <body>
     <div class="board">
+      <div class="wrapper">
+        <div id="library">
+          <div id="upgradeHere" class="card">
+            <div class="stackCount">9</div>
+          </div>
+          <div id="headHere" class="card">
+            <div class="stackCount">9</div>
+          </div>
+          <div id="bigVictoryHere" class="card">
+            <div class="stackCount">9</div>
+          </div>
+          <div id="smallVictoryHere" class="card">
+            <div class="stackCount">9</div>
+          </div>
+          <div id="basicBodiesHere" class="card">
+            <div class="stackCount">9</div>
+          </div>
+          <div id="mutationsHere" class="card last">
+            <div class="stackCount">9</div>
+          </div>
+          <p></p>
+          <div id="libraryDeckHere" class="card">
+          <div class="stackCount"></div>
+          </div>
+          <div id="library1Here" class="card">
+          </div>
+          <div id="library2Here" class="card">
+          </div>
+          <div id="library3Here" class="card">
+          </div>
+          <div id="library4Here" class="card">
+          </div>
+          <div id="library5Here" class="card last"></div>
+        </div>
+      </div>
+      <div id="playerStats">
+        player total power, player beast length, player max beast length
+      </div>
+      <div class="wrapper">
+        <div id="playerArea">
+
+          <div id="playedUpgrades" class="card upgrade"></div>
+
+          <div id="playedHeads" class="card head"></div>
+
+          <div id="" class="button buttonPrimary">
+            start turn
+          </div>
+
+          <div id="playerPlayed">
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+          </div>
+        </div>
+      </div>
       <div id="console">
         Welcome to Build-a-Beast<br />
       </div>
     </div>
-
-    <script type="text/javascript">
-
-$(document).ready(function(){
-  
-var playerName;
-var currentPlayer;
-var currentColors;
-window.noTail = '';
-var topUpgrade;
-var topHead;
-
-//GAME SETUP START
-//create card library deck
-cardLibraryDeck = new Stack();
-cardLibraryDeck.createStack(cardLibrary);
-cardLibraryDeck.shuffle();
-
-//create players
-//TODO allow name input, allow multiple players
-var playerName = new Player('player name');
-
-//create player(s) starting hand(s) and shuffle
-playerName.deck.createStack(starterDeck);
-playerName.deck.shuffle();
-
-//create card banks
-//TODO base this on number of players
-
-//16 mutation cards
-var mutationDeck = new Stack();
-mutationDeck.createStack(mutations);
-cardMultiplier(mutationDeck, mutationDeck[0], 15);
-
-
-//16 body cards
-var basicDeck = new Stack();
-basicDeck.createStack(basicBodies);
-cardMultiplier(basicDeck, basicDeck[0], 15);
-
-
-//16 small victory cards
-var smallVictoryDeck = new Stack();
-smallVictoryDeck.createStack(smallVictory);
-cardMultiplier(smallVictoryDeck, smallVictoryDeck[0], 15);
-
-//8 big victory cards
-var bigVictoryDeck = new Stack();
-bigVictoryDeck.createStack(bigVictory);
-cardMultiplier(bigVictoryDeck, bigVictoryDeck[0], 7);
-
-//upgrade & head cards
-var upgradeDeck = new Stack();
-upgradeDeck.createStack(upgrades);
-upgradeDeck.shuffle();
-
-var headDeck = new Stack();
-headDeck.createStack(heads);
-headDeck.shuffle();
-//TODO end game if these stacks are empty
-
-//top card of each deck into buyable variable
-var upgradeCard = upgradeDeck.deal();
-$('#console').append('<p>upgrade card costs '+upgradeCard.cost.blue+' blue, '+upgradeCard.cost.red+' red, and '+upgradeCard.cost.green+' green.</p>');
-var headCard = headDeck.deal();
-$('#console').append('<p>head card costs '+headCard.cost.blue+' blue, '+headCard.cost.red+' red, and '+headCard.cost.green+' green.</p>');
-
-//put 5 cards from library into hand (buyable)
-for (i=0; i < 5; i++){
-  var card = cardLibraryDeck.deal();
-  $('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
-  cardLibraryDeck.addCard(card, 'hand');
-}
-
-
-
-//Player plays card and buys
-playerTurn(playerName);
-
-//TODO - put below into upgrade function
-//set current player to PlayerName
-//score turn, end buy, tally colors into an object
-currentPlayer = playerName;
-
-currentColors = currentPlayer.scoreTurn();
-
-
-//UPGRADE / evolve
-//check if upgrade and head cards can be bought, start false
-var headBuyable = false;
-var upgradeBuyable = false;
-//check head
-if(currentColors.blue >= headCard.cost.blue){
-  if(currentColors.red >= headCard.cost.red){
-    if(currentColors.green >= headCard.cost.green){
-        headBuyable = true;
-    }
-  }
-} 
-//check upgrade
-if(currentColors.blue >= upgradeCard.cost.blue){
-  if(currentColors.red >= upgradeCard.cost.red){
-    if(currentColors.green >= upgradeCard.cost.green){
-        upgradeBuyable = true;
-    }
-  }
-} 
-//if you can afford it, buy a card
-if(upgradeBuyable == true && headBuyable == true){
-  var choice = prompt('You can evolve! Type "1" to get the upgrade card '+upgradeCard.cardTitle+' or "2" to get the head card '+headCard.cardTitle);
-  if(choice == 1){
-    $('#console').append('<p>You bought '+upgradeCard.cardTitle+'</p>');
-    currentPlayer.deck.addCard(upgradeCard, 'upgrades');
-    return;
-  } else if(choice == 2){
-    $('#console').append('<p>You bought '+headCard.cardTitle+'</p>')
-    currentPlayer.deck.addCard(headCard, 'heads');
-    return;
-  }else{
-    $('#console').append('<p>What are you ... I dont even ...</p>')
-  }
-} else {
-  if(headBuyable == true){
-    $('#console').append('<p>You bought '+headCard.cardTitle+'</p>');
-    //send card to stack.head
-    currentPlayer.deck.addCard(headCard, 'heads');
-    return;
-  }
-  if(upgradeBuyable == true){
-    $('#console').append('<p>You bought '+upgradeCard.cardTitle+'</p>');
-    //send card to stack.upgrades
-    currentPlayer.deck.addCard(upgradeCard, 'upgrades');
-    return;
-  }
-  $('#console').append('<p>nothing to evolve this round.</p>');
-}
-
-//RESET FOR NEXT ROUND
-//all cards in currentPlayer.played go to discards
-for(i = currentPlayer.deck.played.length; i > 0; i--){
-  currentPlayer.deck.addCard(currentPlayer.deck.deal('played'), 'discardPile');
-}
-$('#console').append('<p>Discard pile now contains '+currentPlayer.deck.discardPile.length+' cards</p>');
-
-//check for game end
-var gameDecks = [cardLibraryDeck, mutationDeck, smallVictoryDeck, bigVictoryDeck, headDeck, upgradeDeck]
-//loop through decks array and check if any of empty
-for(i = 0; i < gameDecks.length; i++){
-  if (gameDecks[i].cards.length <= 0){
-    //if array is empty, go to game end function (scoring)
-    scoreGame();
-    return;
-  }
-}
-
-//todo: change player to allow array, switch to next player in array dat end of turn reset
-//Clear player stats & reset tail variable
-window.noTail = '';
-currentPlayer.beastSize = 0;
-currentPlayer.totalColor = [];
-currentPlayer.totalPower = 0;
-
-//replenish library
-//if cardlibrary isn't full, add cards until it is
-if(cardLibraryDeck.hand.length < 5){
-  for(i = cardLibraryDeck.hand.length; i < 5; i++){
-    var card = cardLibraryDeck.deal();
-      $('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
-      cardLibraryDeck.addCard(card, 'hand');
-  }
-}
-
-
-//END GAME function (can be moved)
-function gameEnd(){
-	//TODO 
-	//easier to loop through all decks and add together
-	//scoreDecks = ['cards', 'hand', 'discardPile', 'heads', 'upgrades']
-  //loop through array above
-
-  //score 'cards' deck
-  for (i = 0; i < playerName.deck.cards.length; playerName.deck.cards.splice(0,1)){
-      //score each card
-      playerName.deck.scoreCard(playerName.deck.cards[i], playerName);
-  }
-
-  //score 'discardPile'
-  for (j = 0; j < playerName.deck.discardPile.length; playerName.deck.discardPile.splice(0,1)){
-      //score each card
-      playerName.deck.scoreCard(playerName.deck.discardPile[j], playerName);
-  }
-
-  alert('total score is '+playerName.totalScore);
-}
-
-//testing
-gameEnd();
-
-});
-    </script>
+    <div id="playerDraw">
+    <!-- when draw is triggered, cards go here-->
+    </div>
   </body>
 </html>

@@ -1,6 +1,31 @@
+$(document).ready(function(){
+  
+var playerName;
+//var currentPlayer;
+//var currentColors;
+window.noTail = '';
+var topUpgrade;
+var topHead;
+
+
 //Library of Cards goes here
 var cardLibrary = [
 	['firstCardTitle',4,2,2, 'blue', 'body', 'functionName', '+2 power'],
+	['thick thighs',2,1,2, 'green', 'body', 'functionName', '+2 power'], 
+	['card number 3',2,2,4, 'green', 'tail', 'functionName', '+4 power'],
+	['sticky sav',2,1,3, 'green', 'tail', 'functionName', '+3 power'],
+	['sticky sav2',2,1,3, 'green', 'tail', 'functionName', '+3 power'],
+	['sticky sav3',3,1,3, 'green', 'tail', 'functionName', '+3 power'],
+	['thick thighs',2,1,2, 'green', 'body', 'functionName', '+2 power'], 
+	['card number 3',2,2,4, 'green', 'tail', 'functionName', '+4 power'],
+	['sticky sav',2,1,3, 'green', 'tail', 'functionName', '+3 power'],
+	['sticky sav2',2,1,3, 'green', 'tail', 'functionName', '+3 power'],
+	['sticky sav3',3,1,3, 'green', 'tail', 'functionName', '+3 power'],
+	['thick thighs',2,1,2, 'green', 'body', 'functionName', '+2 power'], 
+	['card number 3',2,2,4, 'green', 'tail', 'functionName', '+4 power'],
+	['sticky sav',2,1,3, 'green', 'tail', 'functionName', '+3 power'],
+	['sticky sav2',2,1,3, 'green', 'tail', 'functionName', '+3 power'],
+	['sticky sav3',3,1,3, 'green', 'tail', 'functionName', '+3 power'],
 	['thick thighs',2,1,2, 'green', 'body', 'functionName', '+2 power'], 
 	['card number 3',2,2,4, 'green', 'tail', 'functionName', '+4 power'],
 	['sticky sav',2,1,3, 'green', 'tail', 'functionName', '+3 power'],
@@ -84,7 +109,6 @@ function Player(playerName) {
     	result.red = 0;
     }
 
-
     //log
     $('#console').append('<p>You have '+this.totalPower+' power left over with '+this.beastSize+" cards played this turn.</p>");
     $('#console').append('<p>You have '+result.blue+' blue, '+result.red+' red, and '+result.green+' green.</p>');
@@ -104,6 +128,23 @@ function Card(cardTitle, cost, points, power, color, cardType, cardFunction, car
 	this.cardColor = color;
 	this.cardFunction = cardFunction;
 	//this.toString = function(card){};
+	this.createNode = function(){
+
+
+
+		//TO DO TO DO function from brainjar
+	  var cardNode, frontNode, indexNode, spotNode, tempNode, textNode;
+  	var indexStr, spotChar;
+
+    // This is the main node, a DIV tag.
+
+    cardNode = document.createElement("DIV");
+    cardNode.className = "card";
+
+    // Build the front of card.
+
+    frontNode = document.createElement("DIV");
+    frontNode.className = "front";
 }
 
 function Stack(){
@@ -263,7 +304,7 @@ function Stack(){
 	//score cards
 	this.scoreCard = function(card, player){
 		player.totalScore += card.points;
-		alert('added '+card.points+' to total, new score '+player.totalScore);
+		$('#console').append('<p>added '+card.points+' to total, new score '+player.totalScore+' </p>');
 	}
 }
 
@@ -273,13 +314,15 @@ function cardMultiplier(stack, card, num){
 	}
 }
 
+//
+//GamePlay functions
+//
 
-//****START TURN******
+//Player Turn
 function playerTurn(playerName){
-//set current player (todo, make this random?)
+//set current player
 var currentPlayer = playerName;
 
-//PLAY
 //play cards while no tails
 do {
   if (currentPlayer.deck.cards.length > 0){
@@ -325,7 +368,130 @@ while (currentPlayer.totalPower >= 2){
 
 }
 
+//UPGRADE
+function playerUpgrade(playerName){
+//tally colors into an object
+var currentPlayer = playerName;
 
+var currentColors = currentPlayer.scoreTurn();
+
+//UPGRADE / evolve
+//check if upgrade and head cards can be bought, start false
+var headBuyable = false;
+var upgradeBuyable = false;
+//check head
+if(currentColors.blue >= headCard.cost.blue){
+  if(currentColors.red >= headCard.cost.red){
+    if(currentColors.green >= headCard.cost.green){
+        headBuyable = true;
+    }
+  }
+} 
+//check upgrade
+if(currentColors.blue >= upgradeCard.cost.blue){
+  if(currentColors.red >= upgradeCard.cost.red){
+    if(currentColors.green >= upgradeCard.cost.green){
+        upgradeBuyable = true;
+    }
+  }
+} 
+//if you can afford it, buy a card
+if(upgradeBuyable == true && headBuyable == true){
+  var choice = prompt('You can evolve! Type "1" to get the upgrade card '+upgradeCard.cardTitle+' or "2" to get the head card '+headCard.cardTitle);
+  if(choice == 1){
+    $('#console').append('<p>You bought '+upgradeCard.cardTitle+'</p>');
+    currentPlayer.deck.addCard(upgradeCard, 'upgrades');
+    return;
+  } else if(choice == 2){
+    $('#console').append('<p>You bought '+headCard.cardTitle+'</p>')
+    currentPlayer.deck.addCard(headCard, 'heads');
+    return;
+  }else{
+    $('#console').append('<p>What are you ... I dont even ...</p>')
+  }
+} else {
+  if(headBuyable == true){
+    $('#console').append('<p>You bought '+headCard.cardTitle+'</p>');
+    //send card to stack.head
+    currentPlayer.deck.addCard(headCard, 'heads');
+    return;
+  }
+  if(upgradeBuyable == true){
+    $('#console').append('<p>You bought '+upgradeCard.cardTitle+'</p>');
+    //send card to stack.upgrades
+    currentPlayer.deck.addCard(upgradeCard, 'upgrades');
+    return;
+  }
+  $('#console').append('<p>nothing to evolve this round.</p>');
+}
+}
+
+//RESET PLAYER / turn end function
+function playerReset(playerName){
+
+var currentPlayer = playerName;
+
+//all cards in currentPlayer.played go to discards
+for(i = currentPlayer.deck.played.length; i > 0; i--){
+  currentPlayer.deck.addCard(currentPlayer.deck.deal('played'), 'discardPile');
+}
+$('#console').append('<p>Discard pile now contains '+currentPlayer.deck.discardPile.length+' cards</p>');
+
+//reset player stats
+currentPlayer.beastSize = 0;
+currentPlayer.totalColor = [];
+currentPlayer.totalPower = 0;
+
+//reset tail status
+window.noTail = '';
+
+}
+
+//CHECK FOR GAME END / Card Library Reset
+function boardReset(){
+	//check for game end
+	var gameDecks = [cardLibraryDeck, mutationDeck, smallVictoryDeck, bigVictoryDeck, headDeck, upgradeDeck]
+	//loop through decks array and check if any of empty
+	for(i = 0; i < gameDecks.length; i++){
+  		if (gameDecks[i].cards.length <= 0){
+    	//if array is empty, go to game end function (scoring)
+    	scoreGame();
+    	return;
+  		}
+	}
+	//replenish library
+	//if cardlibrary isn't full, add cards until it is
+	if (cardLibraryDeck.hand.length < 5){
+  		for(i = cardLibraryDeck.hand.length; i < 5; i++){
+    		var card = cardLibraryDeck.deal();
+      		$('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
+      		cardLibraryDeck.addCard(card, 'hand');
+  			}
+		}
+	}
+
+
+//GAME END
+function scoreGame(){
+	//TODO 
+	//easier to loop through all decks and add together
+	//scoreDecks = ['cards', 'hand', 'discardPile', 'heads', 'upgrades']
+  //loop through array above
+
+  //score 'cards' deck
+  for (i = 0; i < playerName.deck.cards.length; playerName.deck.cards.splice(0,1)){
+      //score each card
+      playerName.deck.scoreCard(playerName.deck.cards[i], playerName);
+  }
+
+  //score 'discardPile'
+  for (j = 0; j < playerName.deck.discardPile.length; playerName.deck.discardPile.splice(0,1)){
+      //score each card
+      playerName.deck.scoreCard(playerName.deck.discardPile[j], playerName);
+  }
+
+  $('#console').append('<p>total score is '+playerName.totalScore+'.</p>');
+}
 
 
 //Card functions
@@ -335,5 +501,108 @@ function tossTail(){
 }
 
 
+
+//
+//UI FUNCTIONS
+//
+
+//UPDATE UI
+function updateData(data, divID){
+	//TODO 
+	//this funciton is used by other functions to update ui to reflect latest data
+}
+
+
+//
+//GAME SETUP START
+//
+//create card library deck
+cardLibraryDeck = new Stack();
+cardLibraryDeck.createStack(cardLibrary);
+cardLibraryDeck.shuffle();
+
+//create players
+//TODO allow name input, allow multiple players
+var playerName = new Player('playername');
+
+//create player(s) starting hand(s) and shuffle
+playerName.deck.createStack(starterDeck);
+playerName.deck.shuffle();
+
+//create card banks
+//TODO base this on number of players
+
+//16 mutation cards
+var mutationDeck = new Stack();
+mutationDeck.createStack(mutations);
+cardMultiplier(mutationDeck, mutationDeck[0], 15);
+
+
+//16 body cards
+var basicDeck = new Stack();
+basicDeck.createStack(basicBodies);
+cardMultiplier(basicDeck, basicDeck[0], 15);
+
+
+//16 small victory cards
+var smallVictoryDeck = new Stack();
+smallVictoryDeck.createStack(smallVictory);
+cardMultiplier(smallVictoryDeck, smallVictoryDeck[0], 15);
+
+//8 big victory cards
+var bigVictoryDeck = new Stack();
+bigVictoryDeck.createStack(bigVictory);
+cardMultiplier(bigVictoryDeck, bigVictoryDeck[0], 7);
+
+//upgrade & head cards
+var upgradeDeck = new Stack();
+upgradeDeck.createStack(upgrades);
+upgradeDeck.shuffle();
+
+var headDeck = new Stack();
+headDeck.createStack(heads);
+headDeck.shuffle();
+
+//top card of each deck into buyable variable
+var upgradeCard = upgradeDeck.deal();
+$('#console').append('<p>upgrade card costs '+upgradeCard.cost.blue+' blue, '+upgradeCard.cost.red+' red, and '+upgradeCard.cost.green+' green.</p>');
+var headCard = headDeck.deal();
+$('#console').append('<p>head card costs '+headCard.cost.blue+' blue, '+headCard.cost.red+' red, and '+headCard.cost.green+' green.</p>');
+
+//put 5 cards from library into hand (buyable)
+for (i=0; i < 5; i++){
+  var card = cardLibraryDeck.deal();
+
+  $('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
+  cardLibraryDeck.addCard(card, 'hand');
+}
+
+//Player plays card and buys
+playerTurn(playerName);
+playerUpgrade(playerName);
+
+//reset for next round
+playerReset(playerName);
+boardReset();
+
+//test round 2
+//Player plays card and buys
+playerTurn(playerName);
+playerUpgrade(playerName);
+
+//reset for next round
+playerReset(playerName);
+boardReset();
+
+//test round 3
+//Player plays card and buys
+playerTurn(playerName);
+playerUpgrade(playerName);
+
+//reset for next round
+playerReset(playerName);
+boardReset();
+
+});
 
 
