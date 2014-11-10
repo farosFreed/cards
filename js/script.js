@@ -1,8 +1,6 @@
 $(document).ready(function(){
   
 var playerName;
-//var currentPlayer;
-//var currentColors;
 window.noTail = '';
 var topUpgrade;
 var topHead;
@@ -456,24 +454,16 @@ do {
 //BUY
 //tell player totalPower from play round
 $('#console').append('<p>You have '+currentPlayer.totalPower+' power to spend.</p>');
-
 //check if player can buy
 if (currentPlayer.totalPower >= 2 ){
-  //cardsAreBuyable = true;
+  //if so, prompt player to click cards
   $('#console').append('<p>Click the card you want to buy.</p>');
-
   //assign click event to library cards
   $('#libraryBuyable').on('click','.card', function(){
         //get card ID
-        //alert(currentPlayer.totalPower);
         var cardID = this.id;
-
-        //testing todo remove
-        //alert("card div id is "+cardID);
-
         //buy card from library and place in player discard
         currentPlayer.deck.addCard(cardLibraryDeck.buyCard(cardID, currentPlayer), 'discardPile');     
-
         //check player power and move to upgrade
         if (currentPlayer.totalPower < 2){
             //if player can't buy then move to upgrade round
@@ -491,17 +481,16 @@ if (currentPlayer.totalPower >= 2 ){
 
 //UPGRADE
 function playerUpgrade(playerName){
-//tally colors into an object
-var currentPlayer = playerName;
 
-var currentColors = currentPlayer.scoreTurn();
-
-//UPGRADE / evolve
-//check if upgrade and head cards can be bought, start false
-
-//turn off click event on libraryBuyable cards
+//First, turn off click event on libraryBuyable cards from previous buy action
 $('#libraryBuyable').off();
 
+
+//tally colors into an object
+var currentPlayer = playerName;
+var currentColors = currentPlayer.scoreTurn();
+
+//vars to check if upgrade and head cards can be bought, start false
 var headBuyable = false;
 var upgradeBuyable = false;
 //check head
@@ -733,10 +722,10 @@ for (i=0; i < 5; i++){
   cardLibraryDeck.addCard(card, 'hand');
 }
 
-//Player plays card and buys
+//Player plays cards until a tail, buys, then triggers upgrade function
 playerTurn(playerName);
-//playerUpgrade(playerName);
 
+//TODO re-integrate these functions into program flow
 //reset for next round
 //playerReset(playerName);
 //boardReset();
