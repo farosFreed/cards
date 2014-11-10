@@ -57,7 +57,7 @@ body {
 	font-family:"Arial",sans-serif;
 }
 
-/*UI*/
+/*UI HELPERS*/
 .wrapper {
 	text-align:center;
 }
@@ -99,11 +99,21 @@ body {
 	margin: 0 auto;
 	display:inline-block;
 }
-#library .card {
-	margin: 0 1.75% 10px 0;
+
+#library.stack .card {
+	margin:0px;
 }
-#library .card.last {
-	margin-right: 0px;
+
+#library #libraryDeckHere.card {
+	float:left;
+	margin-left:100px;
+	margin-top:5px;
+}
+#libraryBuyable {
+	text-align:left;
+}
+#libraryBuyable > div {
+	display:inline;
 }
 
 #playerArea {
@@ -129,16 +139,114 @@ body {
 	text-align:center;
 	margin-bottom:20px;
 }
+#playerStats span {
+	font-size: .5em;
+	display:inline-block;
+	padding:5px;
+}
+#playerStats span span {
+	font-size: 2em;
+	display:block;
+}
 
 /*OBJECTS*/
+.stack {
+	display:inline-block;
+}
+
+/*cards*/
 .card {
 	position:relative;
 	/* playing cards are 2.5in x 3.5in */
 	height:170px; /*todo let content determine this*/
-	width:13.5%;
-	background:#333333;
+	width:121px;
+	background:#fff;
 	display:inline-block;
+	border: 1px solid #666;
+	border-radius: 7px;
+	-moz-border-radius:7px;
+	-webkit-border-radius:7px;
 }
+
+.cardTop {
+	position:relative;
+	color:#000;
+	border-bottom:#867b78;
+	height:15px;
+}
+.cardCost {
+	position:absolute;
+	top:7px;
+	right:10px;
+	z-index:5;
+}
+.cardCost:after {
+	content:'';
+	position:absolute;
+	right:-5px;
+	top:-2px;
+	width:20px;
+	height:20px;
+	background:#ffd473;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	border-radius:10px;
+	z-index:-1;
+}
+
+#mutationsHere .cardTop {
+	background:red;
+}
+
+#smallVictoryHere .cardTop, #bigVictoryHere .cardTop {
+	background:yellow;
+}
+
+#basicBodiesHere .cardTop {
+	background:orange;
+}
+
+#upgradeHere .cardTop, #headHere .cardTop {
+	background:green;
+}
+
+.cardArt {
+	height:80px;
+	width:100%;
+	background-color: #666;
+}
+
+.cardBody {
+	position:relative;
+	width:100%;
+
+}
+.cardsTitle, .cardsType, .cardsText, .cardsColor {
+	font-size: .7em;
+}
+.cardsTitle {
+	position:absolute;
+	left:0px;
+}
+.cardsType {
+	position:absolute;
+	right:0px;
+}
+.cardsText {
+	text-align: left;
+	padding: 15px 5px 0 5px;
+}
+.cardsColor {
+	position:absolute;
+	bottom:0px;
+	left:0px;
+}
+.cardsPoints {
+	position:absolute;
+	bottom:0px;
+	right:0px;
+}
+
 .stackCount {
 	position:absolute;
 	bottom:-15px;
