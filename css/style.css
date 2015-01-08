@@ -72,6 +72,12 @@ body {
 	background:red;
 }
 
+.highlight {
+	-moz-box-shadow: 0 0 5px yellow;
+	-webkit-box-shadow: 0 0 5px yellow;
+	box-shadow: 0px 0px 5px yellow;
+}
+
 /*CARD PLAY AREAS*/
 
 .board {
@@ -111,9 +117,6 @@ body {
 }
 #libraryBuyable {
 	text-align:left;
-}
-#libraryBuyable > div {
-	display:inline;
 }
 
 #playerArea {

@@ -1,9 +1,9 @@
 $(document).ready(function(){
   
-var playerName;
+//var playerName;
 window.noTail = '';
-var topUpgrade;
-var topHead;
+//var topUpgrade;
+//var topHead;
 
 
 //Library of Cards goes here
@@ -32,11 +32,11 @@ var cardLibrary = [
 ]
 
 var starterDeck = [
-	['starterBody',0,4,1, null, 'body', null, '+1 power'],
-	['starterBody',0,4,1, null, 'body', null,'+1 power'],
-	['starterBody',0,4,1, null, 'body', null,'+1 power'],
-	['starterTail',0,2,2, null, 'tail', null,'+2 power'],
-	['starterTail',0,2,2, null, 'tail', null,'+2 power']
+	['starterBody',0,4,1, 'red', 'body', null, '+1 power'],
+	['starterBody',0,4,1, 'blue', 'body', null,'+1 power'],
+	['starterBody',0,4,1, 'blue', 'body', null,'+1 power'],
+	['starterTail',0,2,2, 'blue', 'tail', null,'+2 power'],
+	['starterTail',0,2,2, 'blue', 'tail', null,'+2 power']
 ]
 
 var mutations = [
@@ -89,12 +89,15 @@ function Player(playerName) {
   		this.deck.discard(mutations.deal());
   	}
   	//process color array
-  	var colors = this.totalColor;
-	var result = { };
-	for(i = 0; i < colors.length; ++i) {
-    	if(!result[colors[i]]){
+  	 var colors = this.totalColor;
+	   var result = { };
+	   for(i = 0; i < colors.length; ++i) {
+      //if no color cards were played
+    	 if(!result[colors[i]]){
+          //set to zero
         	result[colors[i]] = 0;
-    	}
+    	 }
+      //increment matching color counter
     	++result[colors[i]];
     }
     if(typeof result.blue === 'undefined'){
@@ -112,7 +115,7 @@ function Player(playerName) {
     $('#console').append('<p>You have '+result.blue+' blue, '+result.red+' red, and '+result.green+' green.</p>');
 
     //return
-    return result;
+    return result; //has properties 'blue','red', and 'green'
   }
 }
 
@@ -366,9 +369,11 @@ function Stack(){
         if (this.hand[i].cost <= player.totalPower){
           //store card in local variable
           var card = this.hand[i];
-          //subtract cost of card from player power
+          //subtract cost of card from player power & update UI
           player.totalPower -= card.cost;
-          //remove from array
+          $('#power').html(player.totalPower);
+
+          //remove card from array
           this.hand.splice(i,1);
           //remove card from UI
           $('#'+cardID+'.card').remove();
@@ -382,13 +387,15 @@ function Stack(){
       } 
     }
   }
-	//adds card to player's played array and tallies beastSize
+	//adds card to player's played array and tallies beastSize / color
 	this.playCard = function(card, player){
 		//play card
 		this.played.push(card);
 
 		//score card power 
 		player.totalPower += card.power;
+    //update UI
+    $('#power').html(player.totalPower);
 
 		//score card color
 		if (card.cardColor != null){
@@ -403,8 +410,8 @@ function Stack(){
 			window.noTail = 'tail';
 		}
 
-		//log
-		$('#console').append('<p>Played '+card.cardTitle+" with power: "+card.power+"and color: "+card.cardColor+".</p>");
+		//TODO remove logs
+		//$('#console').append('<p>Played '+card.cardTitle+" with power: "+card.power+"and color: "+card.cardColor+".</p>");
 	}
 	//score cards
 	this.scoreCard = function(card, player){
@@ -413,81 +420,124 @@ function Stack(){
 	}
 }
 
+
+//Multiply cards in deck
 function cardMultiplier(stack, card, num){
 	for (i=0; i < num; i++){
 		stack.addCard(card);
 	}
 }
 
+
 //
 //GamePlay functions
 //
-
-//Player Turn
+//PLAYER TURN
 function playerTurn(playerName){
 //set current player
-var currentPlayer = playerName;
+//var currentPlayer = playerName;
 
-//PLAY
+//PLAY CARDS
 //while no tails are played, play cards
 do {
-  if (currentPlayer.deck.cards.length > 0){
-
+  //if player has cards left in deck
+  if (playerName.deck.cards.length > 0){
     //get a card
-    var card = currentPlayer.deck.deal();
+    var card = playerName.deck.deal();
     //deal from player cards(deck) to player's game board
-    currentPlayer.deck.playCard(card, currentPlayer);
-
+    playerName.deck.playCard(card, playerName);
     //show card in UI
     $('#playerPlayed').append(card.createNode(card));
-
+  //if player's deck is empty
   } else {
     //put discard into cards and then shuffle
-    currentPlayer.deck.cards = currentPlayer.deck.discardPile.splice(0,currentPlayer.deck.discardPile.length);
-    currentPlayer.deck.shuffle();
+    playerName.deck.cards = playerName.deck.discardPile.splice(0,playerName.deck.discardPile.length);
+    playerName.deck.shuffle();
     $('#console').append('<p>Shuffling...</p>');
     //and then deal
-    currentPlayer.deck.playCard(currentPlayer.deck.deal(), currentPlayer);
+    playerName.deck.playCard(playerName.deck.deal(), playerName);
   }
 } while (window.noTail != 'tail');
 
-//BUY
-//tell player totalPower from play round
-$('#console').append('<p>You have '+currentPlayer.totalPower+' power to spend.</p>');
+//BUY CARDS
 //check if player can buy
-if (currentPlayer.totalPower >= 2 ){
-  //if so, prompt player to click cards
-  $('#console').append('<p>Click the card you want to buy.</p>');
+if (playerName.totalPower >= 2 ){
+  //if so, prompt player to click cards & highlight
+  $('#console').append('<p>Click the card(s) you want to buy.</p>');
+  $('#libraryBuyable .card').addClass('highlight');
+
   //assign click event to library cards
   $('#libraryBuyable').on('click','.card', function(){
         //get card ID
         var cardID = this.id;
         //buy card from library and place in player discard
-        currentPlayer.deck.addCard(cardLibraryDeck.buyCard(cardID, currentPlayer), 'discardPile');     
+        playerName.deck.addCard(cardLibraryDeck.buyCard(cardID, playerName), 'discardPile');     
         //check player power and move to upgrade
-        if (currentPlayer.totalPower < 2){
+        if (playerName.totalPower < 2){
             //if player can't buy then move to upgrade round
-            playerUpgrade(currentPlayer);
+            playerUpgrade(playerName);
         }
     });
 } else {
   //if player can't buy then move to upgrade round
-  playerUpgrade(currentPlayer);
+  playerUpgrade(playerName);
 }
 
 //end player turn function
 };
 
 
-//UPGRADE
-function playerUpgrade(playerName){
 
+//UPGRADE - click events
+//TODO these work directly on current player instead of passing a playerName like others - best way?
+function buyUpgrade(){
+  //add card to players upgrades
+  currentPlayer.deck.addCard(upgradeCard, 'upgrades');
+
+  //remove card in UI & add to players UI
+  $('#upgradeHere .card').remove();
+  $('#playedUpgrades').append(card.createNode(upgradeCard));
+
+  //turn off click events & remove highlight
+  $('#headHere, #upgradeHere').off();
+  $('#headHere .card, #upgradeHere .card').removeClass('highlight');
+
+  //flip next card in upgrade stack
+  upgradeCard = upgradeDeck.deal();
+  $('#upgradeHere').append(upgradeCard.createNode(upgradeCard));
+}
+
+function buyHead(){
+  //add card to players heads
+  currentPlayer.deck.addCard(headCard, 'heads');
+
+  //remove card in UI & add to players UI (remove old Head from UI first)
+  $('#headHere .card').remove();
+  $('#playedHeads .card').remove();
+  $('#playedHeads').append(card.createNode(headCard));
+
+  //turn off click events & remove highlight
+  $('#headHere, #upgradeHere').off();
+  $('#headHere .card, #upgradeHere .card').removeClass('highlight');
+
+  //flip next card in head stack
+  headCard = headDeck.deal();
+  $('#headHere').append(headCard.createNode(headCard));
+}
+
+//test - give player 4 of each color
+
+
+//UPGRADE - MAIN FUNCTION
+function playerUpgrade(playerName){
 //First, turn off click event on libraryBuyable cards from previous buy action
 $('#libraryBuyable').off();
+$('#libraryBuyable .card').removeClass('highlight');
 
+//set player - removed for global
+//var currentPlayer = playerName;
 
 //tally colors into an object
-var currentPlayer = playerName;
 var currentColors = currentPlayer.scoreTurn();
 
 //vars to check if upgrade and head cards can be bought, start false
@@ -509,55 +559,74 @@ if(currentColors.blue >= upgradeCard.cost.blue){
     }
   }
 } 
-//if you can afford it, buy a card
+
+//if you can afford both, choose a card
 if(upgradeBuyable == true && headBuyable == true){
-  var choice = prompt('You can evolve! Type "1" to get the upgrade card '+upgradeCard.cardTitle+' or "2" to get the head card '+headCard.cardTitle);
-  if(choice == 1){
-    $('#console').append('<p>You bought '+upgradeCard.cardTitle+'</p>');
-    currentPlayer.deck.addCard(upgradeCard, 'upgrades');
-    return;
-  } else if(choice == 2){
-    $('#console').append('<p>You bought '+headCard.cardTitle+'</p>')
-    currentPlayer.deck.addCard(headCard, 'heads');
-    return;
-  }else{
-    $('#console').append('<p>What are you ... I dont even ...</p>')
-  }
+
+  //both cards become clickable & highlight
+  $('#headHere .card').addClass('highlight');
+  $('#headHere').on('click','.card', buyHead);
+  $('#upgradeHere .card').addClass('highlight');
+  $('#upgradeHere').on('click','.card', buyUpgrade);
+
+  //TODO done button becomes available to end upgrade round
+
+  //var choice = prompt('You can evolve! Type "1" to get the upgrade card '+upgradeCard.cardTitle+' or "2" to get the head card '+headCard.cardTitle);
+  //if(choice == 1){
+    //$('#console').append('<p>You bought '+upgradeCard.cardTitle+'</p>');
+    //currentPlayer.deck.addCard(upgradeCard, 'upgrades');
+    //return;
+  //} else if(choice == 2){
+    //$('#console').append('<p>You bought '+headCard.cardTitle+'</p>')
+    //currentPlayer.deck.addCard(headCard, 'heads');
+    //return;
+  //}else{
+    //$('#console').append('<p>What are you ... I dont even ...</p>')
+  //}
 } else {
+  //If only head is buyable
   if(headBuyable == true){
-    $('#console').append('<p>You bought '+headCard.cardTitle+'</p>');
-    //send card to stack.head
-    currentPlayer.deck.addCard(headCard, 'heads');
+    //head card clickable & highlight
+    $('#headHere .card').addClass('highlight');
+    $('#headHere').on('click','.card', buyHead);
+
+    //$('#console').append('<p>You bought '+headCard.cardTitle+'</p>');
     return;
   }
+  //if only upgrade is buyable
   if(upgradeBuyable == true){
-    $('#console').append('<p>You bought '+upgradeCard.cardTitle+'</p>');
-    //send card to stack.upgrades
-    currentPlayer.deck.addCard(upgradeCard, 'upgrades');
+    //upgrade card clickable and highlight
+    $('#upgradeHere .card').addClass('highlight');
+    $('#upgradeHere').on('click','.card', buyUpgrade);
+
+    //$('#console').append('<p>You bought '+upgradeCard.cardTitle+'</p>');
     return;
   }
+  //nothing buyable
   $('#console').append('<p>nothing to evolve this round.</p>');
 }
+//TODO trigger next stage
+//end of upgrade function
 }
 
 //RESET PLAYER / turn end function
 function playerReset(playerName){
 
-var currentPlayer = playerName;
+//TODO get rid of this local variable we have global now
+//var currentPlayer = playerName;
 
 //all cards in currentPlayer.played go to discards
-for(i = currentPlayer.deck.played.length; i > 0; i--){
-  var card = currentPlayer.deck.deal('played');
+for(i = playerName.deck.played.length; i > 0; i--){
+  var card = playerName.deck.deal('played');
   $('#playerPlayed #'+card.cardTitle).remove();
-  currentPlayer.deck.addCard(card, 'discardPile');
+  playerName.deck.addCard(card, 'discardPile');
 }
-$('#console').append('<p>Discard pile now contains '+currentPlayer.deck.discardPile.length+' cards</p>');
+$('#console').append('<p>Discard pile now contains '+playerName.deck.discardPile.length+' cards</p>');
 
 //reset player stats
-currentPlayer.beastSize = 0;
-currentPlayer.totalColor = [];
-currentPlayer.totalPower = 0;
-
+playerName.beastSize = 0;
+playerName.totalColor = [];
+playerName.totalPower = 0;
 //reset tail status
 window.noTail = '';
 
@@ -580,7 +649,6 @@ function boardReset(){
 	if (cardLibraryDeck.hand.length < 5){
   		for(i = cardLibraryDeck.hand.length; i < 5; i++){
     		var card = cardLibraryDeck.deal();
-
         //create card in UI
         $('#libraryBuyable #'+i).append(card.createNode(card));
         //console
@@ -595,10 +663,6 @@ function boardReset(){
 
 //GAME END
 function scoreGame(){
-	//TODO 
-	//easier to loop through all decks and add together
-	//scoreDecks = ['cards', 'hand', 'discardPile', 'heads', 'upgrades']
-  //loop through array above
 
   //score 'cards' deck
   for (i = 0; i < playerName.deck.cards.length; playerName.deck.cards.splice(0,1)){
@@ -627,20 +691,13 @@ function tossTail(){
 //UI FUNCTIONS
 //
 
-//UPDATE UI
-function updateData(data, divID){
-	//TODO 
-	//this funciton is used by other functions to update ui to reflect latest data
-}
-
 //PLAYER TURN BUTTON
 $('#playerTurnBtn').on('click', function(){
-
   //hide button
   $(this).hide();
 
   //TODO trigger playerTurn function
-  alert('clicked');
+  //here
 });
 
 
@@ -651,7 +708,7 @@ $('#playerTurnBtn').on('click', function(){
 //START
 //
 
-//UNIQUE CARD IDS
+//Set counter variable for unique card IDs to 3 digits
 var cardIDENTIFIER = 001;
 
 //create card library deck
@@ -659,17 +716,19 @@ cardLibraryDeck = new Stack();
 cardLibraryDeck.createStack(cardLibrary);
 cardLibraryDeck.shuffle();
 
-//create players
+//create player named 'playername'
 //TODO allow name input, allow multiple players
-var playerName = new Player('playername');
+var firstPlayer = new Player('playername');
+//create player starting deck(s) and shuffle
+firstPlayer.deck.createStack(starterDeck);
+firstPlayer.deck.shuffle();
+//var secondPlayer = new Player('playername');
 
-//create player(s) starting deck(s) and shuffle
-playerName.deck.createStack(starterDeck);
-playerName.deck.shuffle();
+//create global currentplayer variable & set it to the first player
+var currentPlayer = firstPlayer;
 
 //create card banks
 //TODO base this on number of players
-
 //16 mutation cards
 var mutationDeck = new Stack();
 mutationDeck.createStack(mutations);
@@ -704,26 +763,27 @@ var headDeck = new Stack();
 headDeck.createStack(heads);
 headDeck.shuffle();
 
-//todo these into dynamic + create node for each card
+//'flip' the top cards of upgrade and head decks (remove them from array and store in variable)
 var upgradeCard = upgradeDeck.deal();
 $('#upgradeHere').append(upgradeCard.createNode(upgradeCard));
-
 var headCard = headDeck.deal();
-$('#headHere').append(upgradeCard.createNode(upgradeCard));
+$('#headHere').append(headCard.createNode(headCard));
 
 //put 5 cards from library into buyable area (library's 'hand')
 for (i=0; i < 5; i++){
+  //get card from library deck
   var card = cardLibraryDeck.deal();
 
-  //create card in UI
-  $('#libraryBuyable #'+i).append(card.createNode(card));
-
-  $('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
+  //put card in deck
   cardLibraryDeck.addCard(card, 'hand');
+
+  //create card in UI and announce
+  $('#libraryBuyable').append(card.createNode(card));
+  $('#console').append('<p>Library adds '+card.cardTitle+' for '+card.cost+' power.</p>');
 }
 
 //Player plays cards until a tail, buys, then triggers upgrade function
-playerTurn(playerName);
+playerTurn(currentPlayer);
 
 //TODO re-integrate these functions into program flow
 //reset for next round
